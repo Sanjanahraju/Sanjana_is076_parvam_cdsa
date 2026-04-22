@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports - Student Management{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block page_subtitle %}Review performance and attendance summaries with export-ready report cards.{% endblock %}
+
+{% block content %}
+<div class="report-grid">
+    {% for report in reports %}
+    <article class="report-card">
+        <div class="report-header">
+            <div>
+                <h3 class="report-title">{{ report.student.name }}</h3>
+                <p class="card-copy">Roll No {{ report.student.roll_no }} • Class {{ report.student.class_ }}</p>
+            </div>
+            <span class="badge-soft">Grade {{ report.grade }}</span>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="stat-label">Attendance Marked</div>
+                <div class="stat-value">{{ report.attendance_count }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Attendance %</div>
+                <div class="stat-value">{{ "%.2f"|format(report.attendance_percentage) }}%</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total Marks</div>
+                <div class="stat-value">{{ report.total_marks }}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Overall %</div>
+                <div class="stat-value">{{ "%.2f"|format(report.percentage) }}%</div>
+            </div>
+        </div>
+
+        <div class="marks-list">
+            {% for mark in report.marks %}
+            <div class="mark-chip">{{ mark.subject }}: {{ mark.marks }}</div>
+            {% else %}
+            <div class="mark-chip">No marks recorded yet</div>
+            {% endfor %}
+        </div>
+
+        {% if current_user.role in ['admin', 'teacher'] or (current_user.role == 'student' and report.student.user_id == current_user.id) %}
+        <a href="{{ url_for('export', student_id=report.student.id) }}" class="btn btn-primary">Export PDF</a>
+        {% endif %}
+    </article>
+    {% else %}
+    <div class="content-card empty-state">No reports are available yet.</div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Marks - Student Management{% endblock %}
+{% block page_title %}Marks{% endblock %}
+{% block page_subtitle %}Enter marks for all students at once across five core subjects from a single grid.{% endblock %}
+
+{% block content %}
+<div class="content-card table-card marks-table">
+    <div class="table-toolbar">
+        <div>
+            <h3 class="card-title">Bulk Marks Entry</h3>
+            <p class="card-copy">Update subject marks in one screen. Existing values are shown and overwritten when you save.</p>
+        </div>
+    </div>
+    <form method="POST">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Roll No</th>
+                        <th>Class</th>
+                        {% for subject_key, subject_name in subjects %}
+                        <th>{{ subject_name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>
+                            <div class="student-cell">
+                                <div class="student-pill">{{ student.name[:1]|upper }}</div>
+                                <div class="student-meta">
+                                    <strong>{{ student.name }}</strong>
+                                    <span>{{ student.email }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge-soft">{{ student.roll_no }}</span></td>
+                        <td>{{ student.class_ }}</td>
+                        {% for subject_key, subject_name in subjects %}
+                        <td>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                class="form-control"
+                                name="marks_{{ student.id }}_{{ subject_key }}"
+                                value="{{ student_marks.get(student.id, {}).get(subject_name, '') }}"
+                                placeholder="0-100"
+                            >
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="{{ 3 + (subjects|length) }}" class="empty-state">No students available for marks entry.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="px-4 py-4">
+            <button type="submit" class="btn btn-primary">Save Marks</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

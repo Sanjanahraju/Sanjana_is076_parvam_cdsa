@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Expense Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Personal Expense Tracker</h1>
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h3>Budget Summary</h3>
+                <div id="summary">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Add Expense</h3>
+                <form id="expenseForm">
+                    <div class="mb-3">
+                        <label for="item" class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="item" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount (₹)</label>
+                        <input type="number" class="form-control" id="amount" min="0" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" required>
+                            <option value="Food">Food</option>
+                            <option value="Transport">Transport</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Expense</button>
+                </form>
+                <div id="warning" class="alert alert-warning mt-3" style="display:none;">
+                    <strong>Budget Crossed!</strong> Expense amount exceeds ₹500.
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h3>Expenses</h3>
+                <table class="table table-striped" id="expensesTable">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Amount</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expensesBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function loadExpenses() {
+            $.get('/expenses', function(data) {
+                $('#expensesBody').empty();
+                data.expenses.forEach(function(exp) {
+                    let warning = exp.amount > 500 ? '<i class="fas fa-exclamation-triangle text-warning"></i>' : '';
+                    $('#expensesBody').append(`
+                        <tr>
+                            <td>${exp.item} ${warning}</td>
+                            <td>₹${exp.amount}</td>
+                            <td>${exp.category}</td>
+                            <td>${exp.date}</td>
+                            <td><button class="btn btn-danger btn-sm" onclick="deleteExpense(${exp.id})">Delete</button></td>
+                        </tr>
+                    `);
+                });
+                $('#summary').html(`
+                    <p><strong>Food:</strong> ₹${data.totals.Food}</p>
+                    <p><strong>Transport:</strong> ₹${data.totals.Transport}</p>
+                    <p><strong>Shopping:</strong> ₹${data.totals.Shopping}</p>
+                    <p><strong>Other:</strong> ₹${data.totals.Other}</p>
+                    <p><strong>Grand Total:</strong> ₹${data.grand_total}</p>
+                `);
+            });
+        }
+
+        $('#expenseForm').on('submit', function(e) {
+            e.preventDefault();
+            let item = $('#item').val();
+            let amount = parseFloat($('#amount').val());
+            let category = $('#category').val();
+            if (amount > 500) {
+                $('#warning').show();
+                setTimeout(function() {
+                    $('#warning').fadeOut();
+                }, 3000);
+            } else {
+                $('#warning').hide();
+            }
+            $.ajax({
+                url: '/expenses',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({item: item, amount: amount, category: category}),
+                success: function() {
+                    loadExpenses();
+                    $('#expenseForm')[0].reset();
+                }
+            });
+        });
+
+        function deleteExpense(id) {
+            $.ajax({
+                url: '/expenses/' + id,
+                type: 'DELETE',
+                success: function() {
+                    loadExpenses();
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            loadExpenses();
+        });
+    </script>
+</body>
+</html>

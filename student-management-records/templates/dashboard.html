@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Student Management{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Monitor your school, keep records organized, and move quickly between students, attendance, marks, and reports.{% endblock %}
+
+{% block content %}
+<div class="hero-card">
+    <div class="hero-badge">School Workspace</div>
+    <h2>Welcome back, {{ current_user.username }}</h2>
+    <p>Your current role is <strong>{{ current_user.role }}</strong>. This dashboard gives you a clean overview of student records and daily operations.</p>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card orange">
+        <div class="metric-icon orange">ST</div>
+        <div class="metric-label">Total Students</div>
+        <div class="metric-value">{{ students|length }}</div>
+        <div class="metric-note">Live roster count</div>
+    </div>
+    <div class="metric-card blue">
+        <div class="metric-icon blue">CL</div>
+        <div class="metric-label">Classes Covered</div>
+        <div class="metric-value">{{ students|map(attribute='class_')|unique|list|length }}</div>
+        <div class="metric-note">Grouped across sections</div>
+    </div>
+    <div class="metric-card purple">
+        <div class="metric-icon purple">RN</div>
+        <div class="metric-label">Latest Roll No</div>
+        <div class="metric-value">{{ students[-1].roll_no if students else '000' }}</div>
+        <div class="metric-note">Auto-numbered alphabetically</div>
+    </div>
+    <div class="metric-card teal">
+        <div class="metric-icon teal">AC</div>
+        <div class="metric-label">Portal Access</div>
+        <div class="metric-value">{{ current_user.role|capitalize }}</div>
+        <div class="metric-note">Current signed-in role</div>
+    </div>
+</div>
+
+<div class="page-grid">
+    <div class="content-card table-card mobile-stack-table">
+        <div class="table-toolbar">
+            <div>
+                <h3 class="card-title">Student Directory</h3>
+                <p class="card-copy">Alphabetically ordered roster with roll numbers assigned automatically.</p>
+            </div>
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('add_student') }}" class="btn btn-primary">Add Student</a>
+            {% endif %}
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Roll No</th>
+                        <th>Class</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td data-label="Student">
+                            <div class="student-cell">
+                                <div class="student-pill">{{ student.name[:1]|upper }}</div>
+                                <div class="student-meta">
+                                    <strong>{{ student.name }}</strong>
+                                    <span>{{ student.email }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td data-label="Roll No"><span class="badge-soft">{{ student.roll_no }}</span></td>
+                        <td data-label="Class">{{ student.class_ }}</td>
+                        <td data-label="Email">{{ student.email }}</td>
+                        <td data-label="Phone">{{ student.phone }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="empty-state">No students available yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="content-card">
+        <div class="card-header-inline">
+            <div>
+                <h3 class="card-title">Quick Actions</h3>
+                <p class="card-copy">Common tasks arranged for faster day-to-day admin work.</p>
+            </div>
+        </div>
+        <div class="quick-links">
+            {% if current_user.role in ['admin', 'teacher'] %}
+            <a href="{{ url_for('students') }}" class="quick-link"><span>Manage student records</span><span>Open</span></a>
+            <a href="{{ url_for('attendance') }}" class="quick-link"><span>Mark attendance in bulk</span><span>Open</span></a>
+            <a href="{{ url_for('marks') }}" class="quick-link"><span>Enter marks for 5 subjects</span><span>Open</span></a>
+            {% endif %}
+            <a href="{{ url_for('reports') }}" class="quick-link"><span>Review reports and export PDFs</span><span>Open</span></a>
+        </div>
+    </div>
+</div>
+{% endblock %}

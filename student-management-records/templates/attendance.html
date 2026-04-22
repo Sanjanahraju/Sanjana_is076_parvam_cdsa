@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance - Student Management{% endblock %}
+{% block page_title %}Attendance{% endblock %}
+{% block page_subtitle %}Mark attendance for the full class in one professional bulk-entry view.{% endblock %}
+
+{% block content %}
+<div class="content-card table-card attendance-table">
+    <div class="table-toolbar">
+        <div>
+            <h3 class="card-title">Bulk Attendance</h3>
+            <p class="card-copy">Choose a date and mark all students from one table. Existing entries for the day are updated automatically.</p>
+        </div>
+    </div>
+    <form method="POST">
+        <div class="px-4 pb-2">
+            <label for="date" class="form-label">Attendance Date</label>
+            <input type="date" class="form-control" id="date" name="date" required>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Roll No</th>
+                        <th>Class</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>
+                            <div class="student-cell">
+                                <div class="student-pill">{{ student.name[:1]|upper }}</div>
+                                <div class="student-meta">
+                                    <strong>{{ student.name }}</strong>
+                                    <span>{{ student.email }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge-soft">{{ student.roll_no }}</span></td>
+                        <td>{{ student.class_ }}</td>
+                        <td>
+                            <select class="form-control" name="status_{{ student.id }}" required>
+                                <option value="Present">Present</option>
+                                <option value="Absent">Absent</option>
+                            </select>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="empty-state">No students available for attendance yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="px-4 py-4">
+            <button type="submit" class="btn btn-primary">Save Attendance</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

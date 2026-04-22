@@ -1,0 +1,25 @@
+{
+    "expenses": [
+        {
+            "item": "Death By Chocolate",
+            "amount": 250,
+            "category": "Food",
+            "id": 1,
+            "date": "2026-04-20"
+        },
+        {
+            "item": "jeans",
+            "amount": 900,
+            "category": "Shopping",
+            "id": 2,
+            "date": "2026-04-20"
+        },
+        {
+            "item": "nandi hills",
+            "amount": 80,
+            "category": "Transport",
+            "id": 3,
+            "date": "2026-04-21"
+        }
+    ]
+}
